@@ -2,6 +2,7 @@
  *  Garage door
  *
  *  v.0.8 4/10/2015
+ *  v.0.9 4/25 lowercase all commands
  *
  */
 #include <user_config.h>
@@ -9,11 +10,11 @@
 #include "application.h"
 
 /*
- * WIFI
- */
-#define WIFI_SSID "Surveillance Drone T.84"
-#define WIFI_PWD "mooza567"
-
+/ * WIFI
+#define WIFI_SSID "MY SSID"
+#define WIFI_PWD "MY PW"
+*/
+#include "mywifi.h"
 
 /*
  *  Hardware
@@ -58,18 +59,9 @@ MqttClient mqtt("mqbroker", 1883, onMessageReceived );
 /*
  *  	CMD BUTTON
  */
-void cheat()
-{
-	// toggle the doorState
-	currentDoorState = currentDoorState == HIGH ? LOW : HIGH ;
-	publishDoorState();
-}
-
 void endPress()
 {
 	digitalWrite( CMDPIN, RELEASE);
-	// cheat and pretend it closed in 8 seconds
-	//cmdTimer.initializeMs( 8000, cheat ).startOnce();
 }
 
 void commandDoor( String message)
