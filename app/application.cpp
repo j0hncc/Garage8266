@@ -1,9 +1,10 @@
 /*
  *  Garage door
  *
- *  v.0.8 4/10/2015
- *  v.0.9 4/25 lowercase all commands
- *
+ *  4/10/2015   v.0.8
+ *  4/25        v.0.10	lowercase all commands
+ *  			v.0.11  Validate incoming cmd.  Add query cmd.
+ *				v.0.12  Tweaked and installed
  */
 #include <user_config.h>
 #include <SmingCore/SmingCore.h>
@@ -49,9 +50,9 @@ void initHardware()
 /*
  * MQTT
  */
-#define CMDTOPIC  "pv/garage/door/cmd"
-#define SENSTOPIC "pv/garage/door/state"
-#define LWTTOPIC "pv/garage/door/lwt"
+#define SUBCMDTOPIC  "pv/garage/door/cmd"
+#define PUBSENSTOPIC "pv/garage/door/state"
+#define PUBLWTTOPIC "pv/garage/door/lwt"
 #define MQTTSERVER "mqbroker.clonts.org"  // e.g. test.mosquitto.org or mqbroker.clonts.org
 MqttClient mqtt("mqbroker", 1883, onMessageReceived );
 
@@ -66,9 +67,14 @@ void endPress()
 
 void commandDoor( String message)
 {
+	if ( message == "query" ) { publishDoorState(); return ; }
+	if ( message != "open" && message != "close") return;
+
 	readDoorState();
 	if ( doorMsg != message )
 	{
+		Serial.print( "Pressing to to change state to: ");
+		Serial.println( message);
 		// do the press
 		digitalWrite( CMDPIN, PRESS);
 		// schedule the release in 1/2 second or so
@@ -84,7 +90,7 @@ void commandDoor( String message)
 void readDoorState()
 {
 	currentDoorState=digitalRead(SENSPIN);
-	debugf( "=============== Reading Door State : %s", doorMsg.c_str());
+	debugf( "=============== Reading Door State : %s\n", doorMsg.c_str());
 	doorMsg= ( currentDoorState ? "close" : "open");
 	if ( currentDoorState == DOORCLOSED )
 		doorMsg="close";
@@ -96,8 +102,8 @@ void readDoorState()
 void publishDoorState()
 {
 	readDoorState();
-	debugf("----------------- Publishing %s", doorMsg.c_str());
-	mqtt.publish( SENSTOPIC, doorMsg, true);
+	debugf("----------------- Publishing %s\n", doorMsg.c_str());
+	mqtt.publish( PUBSENSTOPIC, doorMsg, true);
 }
 
 /*  This interrupt is called when the SENSPIN (reed switch) changes state */
@@ -112,10 +118,11 @@ void onMessageReceived(String topic, String message)
 {
 	Serial.print(topic);
 	Serial.print(":\t"); // Prettify alignment for printing
-	Serial.print(message);
+	Serial.println(message);
 
-	if ( topic == CMDTOPIC ) commandDoor( message);
-	else if ( topic == SENSTOPIC ) publishDoorState();
+	topic.toLowerCase();
+	message.toLowerCase();
+	if ( topic == SUBCMDTOPIC ) commandDoor( message);
 	else Serial.print(" not understood");
 
 	Serial.println();
@@ -127,9 +134,9 @@ void wifiConnectOk()
 	Serial.println("I'm CONNECTED to wifi");
 
 	// Run MQTT client
-	mqtt.connect("esp8266");
-	mqtt.subscribe( CMDTOPIC);
-	mqtt.publish( LWTTOPIC, "online", true );  // LWT not supported yet
+	mqtt.connect("esp8266-gdoor");
+	mqtt.subscribe( SUBCMDTOPIC);
+	//mqtt.publish( PUBLWTTOPIC, "online", true );  // LWT not supported yet
 	publishDoorState();
 }
 
