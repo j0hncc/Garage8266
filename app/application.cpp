@@ -5,7 +5,10 @@
  *  4/25        v.0.10	lowercase all commands
  *  			v.0.11  Validate incoming cmd.  Add query cmd.
  *				v.0.12  Tweaked and installed
+ *	4/28        v.0.14  Boot publish, installed
  */
+#define VERSION "0.14"
+
 #include <user_config.h>
 #include <SmingCore/SmingCore.h>
 #include "application.h"
@@ -20,17 +23,17 @@
 /*
  *  Hardware
  */
-#define CMDPIN 2	// 2X garage door button GPIOx.  LOW==0==press HIGH==1==release
+// use gpio2 and gpio0 for esp01, 14 and 4 for esp12
+#define CMDPIN 2	// gpio2. garage door button GPIOx.  LOW==0==press HIGH==1==release
 #define PRESS LOW
 #define RELEASE HIGH
 #define PRESS_MS 500
 
-#define SENSPIN 0	// 0X magnetic reed switch GPIOx. HIGH==0==switchopen==doorclosed
+#define SENSPIN 0	// gpio4. magnetic reed switch GPIOx. HIGH==0==switchopen==doorclosed
 #define DOOROPEN LOW
 #define DOORCLOSED HIGH
 
-Timer cmdTimer;
-Timer sensTimer;
+Timer cmdTimer, sensTimer, bootTimer;
 int currentDoorState=DOORCLOSED;  // DOOROPEN or DOORCLOSED
 String doorMsg;
 
@@ -128,6 +131,14 @@ void onMessageReceived(String topic, String message)
 	Serial.println();
 }
 
+void onStartMqtt()
+{
+	// publish something
+	//mqtt.publish( PUBLWTTOPIC, "online", true );  // LWT not supported yet
+	Serial.println( "publishing Startup");
+	mqtt.publish( "pv/garage/door/boot", VERSION, false);
+}
+
 // Callback for when WiFi station was connected to AP
 void wifiConnectOk()
 {
@@ -136,8 +147,8 @@ void wifiConnectOk()
 	// Run MQTT client
 	mqtt.connect("esp8266-gdoor");
 	mqtt.subscribe( SUBCMDTOPIC);
-	//mqtt.publish( PUBLWTTOPIC, "online", true );  // LWT not supported yet
-	publishDoorState();
+	// doesn't seem to allow direct publish here, so:
+	bootTimer.initializeMs( 10000, onStartMqtt).startOnce();
 }
 
 // Callback for when WiFi station timeout was reached
