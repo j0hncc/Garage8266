@@ -1,9 +1,9 @@
 # Garage8266
 Garage door sensor/controller via MQTT
 
-This is exploratory project w.r.t. both ESP2688, Sming, GIT, and Github.
+This is exploratory project w.r.t. both ESP2688, Sming, MQTT, GIT, and Github.
 
-The primary purpose of the Garage controller is to enable an action which will close the door every night when/if I leave it about every week or two.  
+The primary purpose of the Garage controller is to enable an action which will close the door every night when/if I leave it open like I tend to do about every week or two.  
 
 MQTT is chosen as the messaging middlewary, so this device only needs to be an MQTT client, and no need for any UI here.
 
