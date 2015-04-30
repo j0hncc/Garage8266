@@ -25,7 +25,7 @@
  *  Hardware
  */
 // use gpio2 and gpio3 for esp01, 14 and 4 for esp12
-#define CMDPIN 2	// gpio2. garage door button GPIOx.  LOW==0==press HIGH==1==release
+#define CMDPIN 2    // gpio2. garage door button GPIOx.  LOW==0==press HIGH==1==release
 #define PRESS LOW
 #define RELEASE HIGH
 #define PRESS_MS 500
@@ -120,9 +120,7 @@ void IRAM_ATTR sensorInterruptHandler()
 // Callback for messages arrived from MQTT server
 void onMessageReceived(String topic, String message)
 {
-	Serial.print(topic);
-	Serial.print(":\t"); // Prettify alignment for printing
-	Serial.println(message);
+	Serial.print(topic); Serial.print(":\t"); Serial.println(message);
 
 	topic.toLowerCase();
 	message.toLowerCase();
@@ -134,9 +132,9 @@ void onMessageReceived(String topic, String message)
 
 void onStartMqtt()
 {
-	// publish something
+	// publish that I am starting
 	mqtt.publish( "pv/garage/door/boot", VERSION, false);
-	mqtt.publish( PUBLWTTOPIC, "online", true );  // LWT not supported yet
+	mqtt.publish( PUBLWTTOPIC, "online", true );  // LWT now supported in my copy of SmingFramework
 	Serial.println( "publishing Startup");
 }
 
