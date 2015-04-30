@@ -7,7 +7,7 @@
  *				v.0.12  Tweaked and installed
  *	4/28        v.0.14  Boot publish, installed
  *	4/29        v.0.16  Switch to use GPIO3 (RXD), LWT implemented in libemqtt, installed
- *	test commit
+ *	test commit3
  */
 #define VERSION "v0.0.16"
 
