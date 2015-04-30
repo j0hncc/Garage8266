@@ -24,13 +24,13 @@
 /*
  *  Hardware
  */
-// use gpio2 and gpio0 for esp01, 14 and 4 for esp12
+// use gpio2 and gpio3 for esp01, 14 and 4 for esp12
 #define CMDPIN 2	// gpio2. garage door button GPIOx.  LOW==0==press HIGH==1==release
 #define PRESS LOW
 #define RELEASE HIGH
 #define PRESS_MS 500
 
-#define SENSPIN 3  // use RX	// gpio4. magnetic reed switch GPIOx. HIGH==0==switchopen==doorclosed
+#define SENSPIN 3   // gpio3. magnetic reed switch GPIOx. HIGH==0==switchopen==doorclosed
 #define DOOROPEN LOW
 #define DOORCLOSED HIGH
 
