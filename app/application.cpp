@@ -6,8 +6,9 @@
  *  			v.0.11  Validate incoming cmd.  Add query cmd.
  *				v.0.12  Tweaked and installed
  *	4/28        v.0.14  Boot publish, installed
+ *	4/29        v.0.16  Switch to use GPIO3 (RXD), LWT implemented in libemqtt, installed
  */
-#define VERSION "0.14"
+#define VERSION "v0.0.16"
 
 #include <user_config.h>
 #include <SmingCore/SmingCore.h>
@@ -29,7 +30,7 @@
 #define RELEASE HIGH
 #define PRESS_MS 500
 
-#define SENSPIN 0	// gpio4. magnetic reed switch GPIOx. HIGH==0==switchopen==doorclosed
+#define SENSPIN 3  // use RX	// gpio4. magnetic reed switch GPIOx. HIGH==0==switchopen==doorclosed
 #define DOOROPEN LOW
 #define DOORCLOSED HIGH
 
@@ -134,9 +135,9 @@ void onMessageReceived(String topic, String message)
 void onStartMqtt()
 {
 	// publish something
-	//mqtt.publish( PUBLWTTOPIC, "online", true );  // LWT not supported yet
-	Serial.println( "publishing Startup");
 	mqtt.publish( "pv/garage/door/boot", VERSION, false);
+	mqtt.publish( PUBLWTTOPIC, "online", true );  // LWT not supported yet
+	Serial.println( "publishing Startup");
 }
 
 // Callback for when WiFi station was connected to AP
@@ -145,7 +146,7 @@ void wifiConnectOk()
 	Serial.println("I'm CONNECTED to wifi");
 
 	// Run MQTT client
-	mqtt.connect("esp8266-gdoor");
+	mqtt.connect("esp8266-gdoor2","","",PUBLWTTOPIC,"offline");	// last will and testament
 	mqtt.subscribe( SUBCMDTOPIC);
 	// doesn't seem to allow direct publish here, so:
 	bootTimer.initializeMs( 10000, onStartMqtt).startOnce();
@@ -162,8 +163,8 @@ void wifiConnectFail()
  */
 void init()
 {
-	Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
-	Serial.systemDebugOutput(true); // Debug output to serial
+	//Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
+	Serial.systemDebugOutput(false); // Debug output to serial
 
 	WifiStation.config(WIFI_SSID, WIFI_PWD);
 	WifiStation.enable(true);
@@ -172,4 +173,5 @@ void init()
 	initHardware();
 
 	WifiStation.waitConnection(wifiConnectOk, 25, wifiConnectFail); // We recommend 20+ seconds for connection timeout at start
+
 }
