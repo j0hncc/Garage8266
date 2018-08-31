@@ -17,4 +17,4 @@ Hardware interface is
 * a reed switch for sensor.  
 * The existing door button of this garage door opener happens to have 24vDC across it when the switch is open, and when pressed passes 30ma.  Therefore I am using a simple PNP transistor driver on GPIO in a never-seen-before-by-me configuration of isolated ground but common Vss (3.3v controller to 24v door opener).  Therefore the button press is "active low" and doesn't suffer from nuances of ESP-01 GPIO0/GPIO2 boot-time signals.
 * 
-Test commit
+Test commit2
